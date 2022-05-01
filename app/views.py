@@ -22,8 +22,6 @@ def sign_up_submit(request):
         last_name = request.POST.get("last_name")
         username = request.POST.get("username")
         email = request.POST.get("email")
-        pin = request.POST.get("pin")
-        phone_number = request.POST.get("phone_number")
         password = request.POST.get("password")
         confirm_password = request.POST.get("confirm_password")
 
@@ -45,24 +43,6 @@ def sign_up_submit(request):
         # Email validation
         if not email:
             messages.error(request, "The 'Email' field can not be empty!")
-            return render(request, "app/sign_up.html")
-
-        # PIN validation
-        if not pin:
-            messages.error(request, "The 'PIN' field can not be empty!")
-            return render(request, "app/sign_up.html")
-
-        if len(pin) != 10:
-            messages.error(request, "Your PIN should contain exactly 10 digits!")
-            return render(request, "app/sign_up.html")
-
-        # Phone number validation
-        if not phone_number:
-            messages.error(request, "The 'Phone number' field can not be empty!")
-            return render(request, "app/sign_up.html")
-
-        if len(phone_number) != 10:
-            messages.error(request, "Your phone number should contain exactly 10 digits!")
             return render(request, "app/sign_up.html")
 
         # Password validation
@@ -116,14 +96,12 @@ def sign_up_submit(request):
                 last_name=last_name,
                 username=username,
                 email=email,
-                pin=pin,
-                phone_number=phone_number,
                 password=password
             )
             
             user.save()
             login(request, user)
-            messages.success(request, "You have registered successfully!")
+            messages.success(request, "You have signed up successfully!")
             return HttpResponseRedirect(reverse("index"))
         except IntegrityError:
             messages.error(request, "Username already taken!")
@@ -156,3 +134,214 @@ def sign_out(request):
     logout(request)
     messages.success(request, "You have logged out successfully!")
     return HttpResponseRedirect(reverse("index"))
+
+@login_required(redirect_field_name="sign_in/")
+def profile(request, username):
+    user = User.objects.get(username=username) or None
+    profile = User.objects.get(pk=request.user.pk) or None
+
+    context = {
+        "user": user,
+    }
+
+    return render(request, "app/profile.html", context)
+
+@login_required(redirect_field_name="sign_in/")
+def profile_edit(request, username):
+    user = User.objects.get(pk=request.user.pk) or None
+
+    context = {
+        "user": user,
+        "join_date": user.date_joined.date(),
+    }
+
+    return render(request, "app/profile_edit.html", context)
+
+@login_required(redirect_field_name="sign_in/")
+def profile_edit_submit(request, username):
+    if request.method == "POST":
+        user = User.objects.get(pk=request.user.pk) or None
+
+        # Profile Credentials
+        username = request.POST.get("username")
+        email = request.POST.get("email")
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name")
+
+        if "img" in request.FILES:
+            profile_picture = request.FILES["img"]
+        else:
+            profile_picture = user.profile_picture
+
+        # Password Credentials
+        current_password = request.POST.get("current_password")
+        new_password = request.POST.get("new_password")
+        confirm_password = request.POST.get("confirm_password")
+
+        user.username = username
+        user.email = email
+        user.first_name = first_name
+        user.last_name = last_name
+        
+        user.profile_picture = profile_picture
+
+        context = {
+            "user": user,
+        }
+
+        if current_password:
+            if new_password:
+                if confirm_password:
+                    if user.check_password(current_password):
+                        if new_password == confirm_password:
+                            user.set_password(new_password)
+                            user.save()
+                            messages.success(request, "Password updated successfully!")
+                            return HttpResponseRedirect(reverse("profile", kwargs=context))
+                        else:
+                            messages.error(request, "Passwords should match!")
+                            return HttpResponseRedirect(reverse("profile_edit", kwargs=context))
+                    else:
+                        messages.error(request, "That's not your current password!")
+                        return HttpResponseRedirect(reverse("profile_edit", kwargs=context))
+                else:
+                    messages.error(request, "'Confirm Password' field can not be empty!")
+                    return HttpResponseRedirect(reverse("profile_edit", kwargs=context))
+            else:
+                messages.error(request, "'New Password' field can not be empty!")
+                return HttpResponseRedirect(reverse("profile_edit", kwargs=context))
+        else:
+            pass
+
+        user.save()
+
+        messages.success(request, "Changes saved successfully!")
+        return HttpResponseRedirect(reverse("index"))
+    else:
+        messages.error(request, "An error occured!")
+        return HttpResponseRedirect(reverse("index"))
+
+@login_required(redirect_field_name="sign_in/")
+def profile_delete(request, username):
+    return render(request, "app/profile_delete.html")
+
+@login_required(redirect_field_name="sign_in/")
+def profile_delete_submit(request, username):
+    if request.method == "POST":
+        user = User.objects.get(pk=request.user.pk) or None
+
+        password = request.POST.get("password")
+
+        context = {
+            "user": user,
+        }
+
+        if user.check_password(password):
+            user.delete()
+            messages.success(request, "Profile deleted successfully!")
+            return HttpResponseRedirect(reverse("index"))
+        else:
+            messages.error(request, "Wrong password!")
+            return HttpResponseRedirect(reverse("profile_edit", kwargs=context))
+    else:
+        messages.error(request, "An error occured!")
+        return HttpResponseRedirect(reverse("profile_edit", kwargs=context))
+
+@login_required(redirect_field_name="sign_in/")
+def applications(request):
+    applications = Application.objects.all()
+    users = User.objects.all()
+
+    applications_paginator = Paginator(applications, 5)
+
+    page_number = request.GET.get("page")
+
+    try:
+        application_obj = applications_paginator.get_page(page_number)
+    except PageNotAnInteger:
+        application_obj = applications_paginator.page(1)
+    except EmptyPage:
+        application_obj = applications_paginator.page(applications_paginator.num_pages)
+
+    context = {
+        "applications": application_obj,
+        "users": users,
+    }
+
+    return render(request, "app/applications.html", context)
+
+@login_required(redirect_field_name="sign_in/")
+def application_create(request):
+    if request.method == "POST":
+        title = request.POST.get("title")
+        description = request.POST.get("description")
+        address = request.POST.get("address")
+        status = request.POST.get("status")
+        date_of_visit_by_technician = request.POST.get("date_of_visit_by_technician")
+        technician_id = request.POST.get("technician")
+
+        technician = User.objects.get(pk=technician_id) or None
+        
+        if "img" in request.FILES:
+            picture = request.FILES.get("img")
+        else:
+            picture = "../static/images/application.png"
+
+        application = Application.objects.create(
+            customer=request.user,
+            title=title,
+            description=description,
+            address=address,
+            status=status,
+            date_of_visit_by_technician=date_of_visit_by_technician,
+            technician=technician,
+            image=picture
+        )
+
+        application.save()
+        messages.success(request, f"Application created successfully!")
+        return HttpResponseRedirect(reverse("applications"))
+    else:
+        return render(request, "app/applications.html")
+
+@login_required(redirect_field_name="sign_in/")
+def application_edit(request, id):
+    if request.method == "POST":
+        application = application.objects.get(pk=id) or None
+        
+        title = request.POST.get("title")
+        description = request.POST.get("description")
+        address = request.POST.get("address")
+        status = request.POST.get("status")
+        date_of_visit_by_technician = request.POST.get("date_of_visit_by_technician")
+        technician = request.POST.get("technician")
+        
+        if "img" in request.FILES:
+            picture = request.FILES.get("img")
+        else:
+            picture = "../static/images/application.png"
+
+        application.title=title,
+        application.description=description,
+        application.address=address,
+        application.status=status,
+        application.date_of_visit_by_technician=date_of_visit_by_technician,
+        application.technician=technician,
+        application.picture=picture
+
+        application.save()
+
+        messages.success(request, f"Application updated successfully!")
+        return HttpResponseRedirect(reverse("applications"))
+    else:
+        return render(request, "app/applications.html")
+
+@login_required(redirect_field_name="sign_in/")
+def application_delete(request, id):
+    if request.method == "POST":
+        application = application.objects.get(pk=id) or None
+        application.delete()
+        messages.success(request, f"Application deleted successfully!")
+        return HttpResponseRedirect(reverse("applications"))
+    else:
+        return render(request, "app/applications.html")

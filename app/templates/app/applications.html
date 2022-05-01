@@ -1,0 +1,298 @@
+{% extends "app/layout.html" %}
+
+{% block body %}
+<div class="container mt-3">
+    <div class="main-body">
+        <div class="row gutters-sm">
+            <div class="col text-center">
+                <div class="applicationd mb-3">
+                    <div class="applicationd-body">
+                        <div class="row">
+                            <div class="col">
+                                <h2 class="mb-0">Rent a application</h2>
+
+                                <div class="modal fade text-left" id="createapplication">
+                                    <form action="{% url 'application_create' %}" method="POST" enctype="multipart/form-data">
+                                        {% csrf_token %}
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h2>Add a application</h2>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="form-group">
+                                                        <label for="title" class="form-label">Title</label>
+                                                        <input class="form-control" type="text" name="title" placeholder="Enter title" required>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="description" class="form-label">Description</label>
+                                                        <input class="form-control" type="text" name="description" placeholder="Enter description" required>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="address" class="form-label">Address</label>
+                                                        <input class="form-control" type="text" name="address" placeholder="Enter address" required>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="status" class="form-label">Status</label>
+                                                        <select name="status" id="status" class="form-select" aria-label="Default select example">
+                                                            <option value="Waiting ...">Waiting ...</option>
+                                                            <option value="Expecting a visit!">Expecting a visit!</option>
+                                                            <option value="In progress ...">In progress ...</option>
+                                                            <option value="Completed">Completed</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="date_of_visit_by_technician" class="form-label">Date of visit by technician</label>
+                                                        <input class="form-control" type="date" name="date_of_visit_by_technician" placeholder="Enter date" required>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="img" class="form-label">Image</label>
+                                                        <input class="form-control" type="file" name="img" accept="image/*" placeholder="Enter image">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="technician" class="form-label">Technician</label>
+                                                        <select name="technician" id="technician" class="form-select" aria-label="Default select example">
+                                                            {% for user in users %}
+                                                                <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button class="btn btn-success" type="submit">
+                                                        <i class="fa fa-floppy-o" aria-hidden="true"></i> Save
+                                                    </button>
+                                                    <button class="btn btn-danger" type="submit" data-dismiss="modal" value="Close">
+                                                        <i class="fa fa-times" aria-hidden="true"></i> Close
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <a class="btn btn-primary" href="" data-toggle="modal" data-target="#createapplication" enctype="multipart/form-data">
+                                    <i class="fa fa-application" aria-hidden="true"></i> Add a application
+                                </a>
+                            </div>
+                        </div>
+                        <hr>
+                        {% for application in applications %}
+                            <div class="row p-2 application-items">
+                                <div class="col-sm-3 application">
+                                    <div class="row">
+                                        <h6 class="mb-0">
+                                            <a class="application-a" href="" data-toggle="modal" data-target="#applicationModal{{ application.id }}">
+                                                {{ application.brand }} {{ application.model }}
+                                            </a>
+
+                                            <div class="modal fade text-left" id="applicationModal{{ application.id }}">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h2>{{ application.brand }} {{ application.model }}</h2>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <div class="row">
+                                                                <img src="{{ application.image_url }}" alt="Image">
+                                                            </div>
+                                                            <div class="row">
+                                                                <h3>{{ application.description }}</h3>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <a class="btn btn-success" href="" type="button" data-toggle="modal" data-target="#applyModal{{ application.id }}">
+                                                                <i class="fa fa-plus" data-toggle="tooltip" data-placement="bottom" title="Apply for the application"></i> Apply
+                                                            </a>
+                                                            {% if request.user.is_staff %}
+                                                                <a class="btn btn-primary" href="" data-toggle="modal" data-target="#editapplicationModal{{ application.id }}">
+                                                                    <i class="fa fa-pencil" data-toggle="tooltip" data-placement="bottom" title="Edit application"></i> Edit
+                                                                </a>
+                                                                <a class="btn btn-danger" href="" data-toggle="modal" data-target="#deleteapplicationModal{{ application.id }}">
+                                                                    <i class="fa fa-trash-o" data-toggle="tooltip" data-placement="bottom" title="Delete application"></i> Delete
+                                                                </a>
+                                                            {% endif %}
+                                                            <button class="btn btn-danger" type="submit" data-dismiss="modal" value="Close">
+                                                                <i class="fa fa-times" aria-hidden="true"></i> Close
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </h6>
+                                    </div>
+                                    
+                                    <div class="row application-buttons">
+                                        
+
+                                        {% if request.user.is_staff %}
+                                        <div class="col application-edit-btn">
+                                            <a class="application-edit-a" href="" data-toggle="modal" data-target="#editapplicationModal{{ application.id }}">
+                                                <i class="fa fa-pencil text-info btn" data-toggle="tooltip" data-placement="bottom" title="Edit application"></i>
+                                            </a>
+
+                                            <div class="modal fade text-left" id="editapplicationModal{{ application.id }}">
+                                                <form action="{% url 'application_edit' id=application.id %}" method="POST" enctype="multipart/form-data">
+                                                    {% csrf_token %}
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h2>{{ application.brand }} {{ application.model }}</h2>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <div class="form-group">
+                                                                    <label for="brand" class="form-label">Brand</label>
+                                                                    <input class="form-control" type="text" name="brand" placeholder="Enter brand" value="{{ application.brand }}" required>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label for="model" class="form-label">Model</label>
+                                                                    <input class="form-control" type="text" name="model" placeholder="Enter model" value="{{ application.model }}" required>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label for="year" class="form-label">Year</label>
+                                                                    <input class="form-control" type="date" name="year" placeholder="Enter year" value="{{ application.year }}" required>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label for="seats" class="form-label">Seats</label>
+                                                                    <input class="form-control" type="number" name="seats" placeholder="Enter amount of seats" value="{{ application.seats }}" required>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label for="price" class="form-label">Price</label>
+                                                                    <input class="form-control" type="number" name="price" placeholder="Enter price" value="{{ application.price }}" step=".01" required>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label for="image" class="form-label">Image</label>
+                                                                    <input class="form-control" type="file" name="img" accept="image/*" placeholder="Enter image" value="{{ application.picture }}">
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label for="description" class="form-label">Description</label>
+                                                                    <textarea class="form-control" name="description" placeholder="Enter description" required>{{ application.description }}</textarea>
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button class="btn btn-success" type="submit">
+                                                                    <i class="fa fa-floppy-o" aria-hidden="true"></i> Save
+                                                                </button>
+                                                                <button class="btn btn-primary" type="submit" data-dismiss="modal" value="Close">
+                                                                    <i class="fa fa-cross" aria-hidden="true"></i> Close
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+
+                                        <div class="col application-delete-btn">
+                                            <a class="application-delete-a" href="" data-toggle="modal" data-target="#deleteapplicationModal{{ application.id }}">
+                                                <i class="fa fa-trash-o text-danger btn" data-toggle="tooltip" data-placement="bottom" title="Delete application"></i>
+                                            </a>
+            
+                                            <div class="modal fade" id="deleteapplicationModal{{ application.id }}">
+                                                <form action="{% url 'application_delete' id=application.id %}" method="POST">
+                                                    {% csrf_token %}
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h2>Delete "{{ application.brand }} {{ application.model }}"?</h2>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button class="btn btn-danger" type="submit">
+                                                                    Delete
+                                                                </button>
+                                                                <button class="btn btn-primary" type="submit" data-dismiss="modal" value="Close">
+                                                                    Go back
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-9 text-secondary">
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class="row">
+                                                <h6>Brand</h6>
+                                            </div>
+                                            <div class="row">
+                                                <h6>{{ application.brand }}</h6>
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="row">
+                                                <h6>Model</h6>
+                                            </div>
+                                            <div class="row">
+                                                <h6>{{ application.model }}</h6>
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="row">
+                                                <h6>Year</h6>
+                                            </div>
+                                            <div class="row">
+                                                <h6>{{ application.year }}</h6>
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="row">
+                                                <h6>Seats</h6>
+                                            </div>
+                                            <div class="row">
+                                                <h6>{{ application.seats }}</h6>
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="row">
+                                                <h6>Price</h6>
+                                            </div>
+                                            <div class="row">
+                                                <h6>{{ application.price }} $</h6>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <h4 class="text-center">No applications yet...</h4>
+                        {% endfor %}
+
+                        {% if applications %}
+                            <nav aria-label="Page navigation example">
+                                <ul class="pagination justify-content-center">
+                                    {% if applications.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ applications.previous_page_number }}" aria-label="Previous">
+                                            <span aria-hidden="true">&laquo;</span>
+                                            <span class="sr-only">Previous</span>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+
+                                    <li class="page-item"><a class="page-link" href="">{{ applications.number }}</a></li>
+
+                                    {% if applications.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ applications.next_page_number }}" aria-label="Next">
+                                            <span aria-hidden="true">&raquo;</span>
+                                            <span class="sr-only">Next</span>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        {% endif %}
+                        <hr>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

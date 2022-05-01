@@ -5,5 +5,7 @@ class ApplicationAdmin(admin.ModelAdmin):
     list_display = ["title", "technician"]
 
 
-admin.site.register(User)
+admin.site.register(Administrator)
+admin.site.register(Tech)
+admin.site.register(Customer)
 admin.site.register(Application, ApplicationAdmin)

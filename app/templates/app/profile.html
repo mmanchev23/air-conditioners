@@ -24,7 +24,7 @@
                       <span class="badge bg-warning">Administrator</span>
                     {% elif request.user.role == "Tech" %}
                       <span class="badge bg-primary">Technician</span>
-                    {% else %}
+                    {% elif request.user.role == "Customer" %}
                       <span class="badge bg-success">Customer</span>
                     {% endif %}
                   </h5>

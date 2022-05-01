@@ -1,4 +1,5 @@
 from .models import *
+from datetime import datetime
 from django.db.models import Q
 from django.urls import reverse
 from django.shortcuts import render
@@ -251,7 +252,7 @@ def profile_delete_submit(request, username):
 def applications(request):
     if request.user.role == "Customer":
         applications = Application.objects.filter(customer=request.user)
-        users = User.objects.all()
+        users = User.objects.filter(role="Tech")
 
         applications_paginator = Paginator(applications, 5)
 
@@ -272,7 +273,8 @@ def applications(request):
         return render(request, "app/applications.html", context)
     elif request.user.role == "Tech":
         applications = Application.objects.filter(technician=request.user)
-        users = User.objects.all()
+        todays = Application.objects.filter(date_of_visit_by_technician=datetime.today())
+        users = User.objects.filter(role="Tech")
 
         applications_paginator = Paginator(applications, 5)
 
@@ -288,6 +290,7 @@ def applications(request):
         context = {
             "applications": application_obj,
             "users": users,
+            "todays": todays,
         }
 
         return render(request, "app/applications.html", context)
@@ -347,6 +350,7 @@ def application_edit(request, id):
         title = request.POST.get("title")
         description = request.POST.get("description")
         address = request.POST.get("address")
+        status = request.POST.get("status")
         
         if "img" in request.FILES:
             picture = request.FILES.get("img")
@@ -357,6 +361,9 @@ def application_edit(request, id):
         application.description=description
         application.address=address
         application.image=picture
+
+        if status:
+            application.status = status
 
         application.save()
 

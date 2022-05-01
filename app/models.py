@@ -15,6 +15,9 @@ class User(AbstractUser):
     role = models.CharField(max_length=13, choices=ROLES, default="Customer")
     pass
 
+    def __str__(self) -> str:
+        return self.username
+
     @property
     def image_url(self) -> str:
         if self.profile_picture and hasattr(self.profile_picture, "url"):
@@ -42,6 +45,9 @@ class Application(models.Model):
     technician = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True, editable=False)
     updated = models.DateTimeField(auto_now=True, editable=False)
+
+    def __str__(self) -> str:
+        return self.title
 
     @property
     def image_url(self) -> str:

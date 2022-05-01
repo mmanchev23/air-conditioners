@@ -5,77 +5,135 @@
     <div class="main-body">
         <div class="row gutters-sm">
             <div class="col text-center">
-                <div class="applicationd mb-3">
-                    <div class="applicationd-body">
+                <div class="card mb-3">
+                    <div class="card-body">
                         <div class="row">
                             <div class="col">
-                                <h2 class="mb-0">Applications</h2>
-
-                                <div class="modal fade text-left" id="createapplication">
-                                    <form action="{% url 'application_create' %}" method="POST" enctype="multipart/form-data">
-                                        {% csrf_token %}
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h2>Add a application</h2>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <div class="form-group">
-                                                        <label for="title" class="form-label">Title</label>
-                                                        <input class="form-control" type="text" name="title" placeholder="Enter title" required>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label for="description" class="form-label">Description</label>
-                                                        <input class="form-control" type="text" name="description" placeholder="Enter description" required>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label for="address" class="form-label">Address</label>
-                                                        <input class="form-control" type="text" name="address" placeholder="Enter address" required>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label for="img" class="form-label">Image</label>
-                                                        <input class="form-control" type="file" name="img" accept="image/*" placeholder="Enter image">
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button class="btn btn-success" type="submit">
-                                                        <i class="fa fa-floppy-o" aria-hidden="true"></i> Save
-                                                    </button>
-                                                    <button class="btn btn-danger" type="submit" data-dismiss="modal" value="Close">
-                                                        <i class="fa fa-times" aria-hidden="true"></i> Close
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </form>
+                                <div class="row">
+                                    <h2 class="mb-0">Applications</h2>
                                 </div>
-                            </div>
-                            <div class="col">
-                                <a class="btn btn-primary" href="" data-toggle="modal" data-target="#createapplication" enctype="multipart/form-data">
-                                    <i class="fa fa-application" aria-hidden="true"></i> Create a application
-                                </a>
-                            </div>
-                            <div class="col">
-                                <form action="{% url 'applications_filter' %}" method="post">
-                                    {% csrf_token %}
-                                    <div class="row">
+                                <div class="row">
+                                    {% if request.user.role == "Tech" %}
                                         <div class="col">
-                                            <div class="form-group">
-                                                <button class="btn btn-success" type="submit"><i class="fa fa-search" aria-hidden="true"></i> Search</button>
+                                            <div class="modal fade text-left" id="today">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h2>Applications for today</h2>
+                                                        </div>
+                                                        <div class="modal-body text-center">
+                                                            <div class="row">
+                                                                <div class="col">
+                                                                    Title
+                                                                </div>
+                                                                <div class="col">
+                                                                    Customer
+                                                                </div>
+                                                                <div class="col">
+                                                                    Address
+                                                                </div>
+                                                            </div>
+                                                            {% for today in todays %}
+                                                                <div class="row">
+                                                                    <div class="col">
+                                                                        <a class="application-a" href="" data-toggle="modal" data-target="#applicationModal{{ today.id }}">
+                                                                            {{ today.title }}
+                                                                        </a>
+                                                                    </div>
+                                                                    <div class="col">
+                                                                        {{ today.customer }}
+                                                                    </div>
+                                                                    <div class="col">
+                                                                        {{ today.address }}
+                                                                    </div>
+                                                                </div>
+                                                            {% empty %}
+                                                                No applications fro today
+                                                            {% endfor %}
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button class="btn btn-danger" type="submit" data-dismiss="modal" value="Close">
+                                                                <i class="fa fa-times" aria-hidden="true"></i> Close
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
+                                            <a class="btn btn-primary" href="" data-toggle="modal" data-target="#today" enctype="multipart/form-data">
+                                                <i class="fa fa-application" aria-hidden="true"></i> Applications Today
+                                            </a>
                                         </div>
-                                        <div class="col">
-                                            <div class="form-group">
-                                                <select name="status" id="status" class="form-select" aria-label="Default select example">
-                                                    <option value="Waiting ...">Waiting ...</option>
-                                                    <option value="Expecting a visit!">Expecting a visit!</option>
-                                                    <option value="In progress ...">In progress ...</option>
-                                                    <option value="Completed">Completed</option>
-                                                </select>
-                                            </div>
+                                    {% endif %}
+                                    <div class="col">
+                                        <div class="modal fade text-left" id="createapplication">
+                                            <form action="{% url 'application_create' %}" method="POST" enctype="multipart/form-data">
+                                                {% csrf_token %}
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h2>Add a application</h2>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <div class="form-group">
+                                                                <label for="title" class="form-label">Title</label>
+                                                                <input class="form-control" type="text" name="title" placeholder="Enter title" required>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label for="description" class="form-label">Description</label>
+                                                                <input class="form-control" type="text" name="description" placeholder="Enter description" required>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label for="address" class="form-label">Address</label>
+                                                                <input class="form-control" type="text" name="address" placeholder="Enter address" required>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label for="img" class="form-label">Image</label>
+                                                                <input class="form-control" type="file" name="img" accept="image/*" placeholder="Enter image">
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button class="btn btn-success" type="submit">
+                                                                <i class="fa fa-floppy-o" aria-hidden="true"></i> Save
+                                                            </button>
+                                                            <button class="btn btn-danger" type="submit" data-dismiss="modal" value="Close">
+                                                                <i class="fa fa-times" aria-hidden="true"></i> Close
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </form>
                                         </div>
                                     </div>
-                                </form>
+                                    
+                                    <div class="col">
+                                        <a class="btn btn-primary" href="" data-toggle="modal" data-target="#createapplication" enctype="multipart/form-data">
+                                            <i class="fa fa-application" aria-hidden="true"></i> Create a application
+                                        </a>
+                                    </div>
+
+                                    <div class="col">
+                                        <form action="{% url 'applications_filter' %}" method="post">
+                                            {% csrf_token %}
+                                            <div class="row">
+                                                <div class="col">
+                                                    <div class="form-group">
+                                                        <button class="btn btn-success" type="submit"><i class="fa fa-search" aria-hidden="true"></i> Search</button>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="form-group">
+                                                        <select name="status" id="status" class="form-select" aria-label="Default select example">
+                                                            <option value="Waiting ...">Waiting ...</option>
+                                                            <option value="Expecting a visit!">Expecting a visit!</option>
+                                                            <option value="In progress ...">In progress ...</option>
+                                                            <option value="Completed">Completed</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <hr>
@@ -128,6 +186,12 @@
                                                                 <h2>{{ application.title }}</h2>
                                                             </div>
                                                             <div class="modal-body">
+                                                                {% if request.user.role == "Administrator" %}
+                                                                    <div class="form-group">
+                                                                        <label for="technician" class="form-label">Customer:</label>
+                                                                        <div>{{ application.customer.username }}</div>
+                                                                    </div>
+                                                                {% endif %}
                                                                 <div class="form-group">
                                                                     <label for="title" class="form-label">Title</label>
                                                                     <input class="form-control" type="text" name="title" placeholder="Enter title" value="{{ application.title }}" required>
@@ -144,6 +208,27 @@
                                                                     <label for="img" class="form-label">Image</label>
                                                                     <input class="form-control" type="file" name="img" accept="image/*" placeholder="Enter image" value="{{ application.image }}">
                                                                 </div>
+                                                                {% if request.user.role == "Tech" or request.user.role == "Administrator" %}
+                                                                    <div class="form-group">
+                                                                        <label for="status" class="form-label">Status</label>
+                                                                        <select name="status" id="status" class="form-select" aria-label="Default select example">
+                                                                            <option value="Waiting ...">Waiting ...</option>
+                                                                            <option value="Expecting a visit!">Expecting a visit!</option>
+                                                                            <option value="In progress ...">In progress ...</option>
+                                                                            <option value="Completed">Completed</option>
+                                                                        </select>
+                                                                    </div>
+                                                                {% endif %}
+                                                                {% if request.user.role == "Administrator" %}
+                                                                    <div class="form-group">
+                                                                        <label for="technician" class="form-label">Technician</label>
+                                                                        <select name="technician" id="technician" class="form-select" aria-label="Default select example">
+                                                                            {% for user in users %}
+                                                                                <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }}</option>
+                                                                            {% endfor %}
+                                                                        </select>
+                                                                    </div>
+                                                                {% endif %}
                                                             </div>
                                                             <div class="modal-footer">
                                                                 <button class="btn btn-success" type="submit">
@@ -159,33 +244,60 @@
                                             </div>
                                         </div>
 
-                                        {% if application.status == "Waiting ..." %}
-                                        <div class="col application-delete-btn">
-                                            <a class="application-delete-a" href="" data-toggle="modal" data-target="#deleteapplicationModal{{ application.id }}">
-                                                <i class="fa fa-trash-o text-danger btn" data-toggle="tooltip" data-placement="bottom" title="Delete application"></i>
-                                            </a>
-            
-                                            <div class="modal fade" id="deleteapplicationModal{{ application.id }}">
-                                                <form action="{% url 'application_delete' id=application.id %}" method="POST">
-                                                    {% csrf_token %}
-                                                    <div class="modal-dialog">
-                                                        <div class="modal-content">
-                                                            <div class="modal-header">
-                                                                <h2>Delete "{{ application.title }}"?</h2>
-                                                            </div>
-                                                            <div class="modal-footer">
-                                                                <button class="btn btn-danger" type="submit">
-                                                                    Delete
-                                                                </button>
-                                                                <button class="btn btn-primary" type="submit" data-dismiss="modal" value="Close">
-                                                                    Go back
-                                                                </button>
+                                        {% if application.status == "Waiting ..." and request.user.role == "Customer" %}
+                                            <div class="col application-delete-btn">
+                                                <a class="application-delete-a" href="" data-toggle="modal" data-target="#deleteapplicationModal{{ application.id }}">
+                                                    <i class="fa fa-trash-o text-danger btn" data-toggle="tooltip" data-placement="bottom" title="Delete application"></i>
+                                                </a>
+                
+                                                <div class="modal fade" id="deleteapplicationModal{{ application.id }}">
+                                                    <form action="{% url 'application_delete' id=application.id %}" method="POST">
+                                                        {% csrf_token %}
+                                                        <div class="modal-dialog">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h2>Delete "{{ application.title }}"?</h2>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button class="btn btn-danger" type="submit">
+                                                                        Delete
+                                                                    </button>
+                                                                    <button class="btn btn-primary" type="submit" data-dismiss="modal" value="Close">
+                                                                        Go back
+                                                                    </button>
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                </form>
+                                                    </form>
+                                                </div>
                                             </div>
-                                        </div>
+                                        {% elif request.user.role != "Customer" %}
+                                            <div class="col application-delete-btn">
+                                                <a class="application-delete-a" href="" data-toggle="modal" data-target="#deleteapplicationModal{{ application.id }}">
+                                                    <i class="fa fa-trash-o text-danger btn" data-toggle="tooltip" data-placement="bottom" title="Delete application"></i>
+                                                </a>
+                
+                                                <div class="modal fade" id="deleteapplicationModal{{ application.id }}">
+                                                    <form action="{% url 'application_delete' id=application.id %}" method="POST">
+                                                        {% csrf_token %}
+                                                        <div class="modal-dialog">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h2>Delete "{{ application.title }}"?</h2>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button class="btn btn-danger" type="submit">
+                                                                        Delete
+                                                                    </button>
+                                                                    <button class="btn btn-primary" type="submit" data-dismiss="modal" value="Close">
+                                                                        Go back
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
                                         {% endif %}
                                     </div>
                                 </div>

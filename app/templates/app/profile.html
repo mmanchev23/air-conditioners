@@ -20,10 +20,12 @@
                     {% endif %}
                   </h4>
                   <h5>
-                    {% if user.is_superuser %}
+                    {% if request.user.role == "Administrator" %}
                       <span class="badge bg-warning">Administrator</span>
+                    {% elif request.user.role == "Tech" %}
+                      <span class="badge bg-primary">Technician</span>
                     {% else %}
-                      <span class="badge bg-primary">User</span>
+                      <span class="badge bg-success">Customer</span>
                     {% endif %}
                   </h5>
                   {% if user == request.user %}

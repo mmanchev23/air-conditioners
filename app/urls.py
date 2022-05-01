@@ -35,6 +35,7 @@ urlpatterns = [
     path("application/<uuid:id>/create/", application_create, name="application_create"),
     path("application/<uuid:id>/edit/", application_edit, name="application_edit"),
     path("application/<uuid:id>/delete/", application_delete, name="application_delete"),
+    path("applications/filter/", applications_filter, name="applications_filter"),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

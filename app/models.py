@@ -36,10 +36,10 @@ class Application(models.Model):
     title = models.CharField(max_length=30, null=False, blank=False)
     description = models.TextField(null=False, blank=False)
     address = models.CharField(max_length=30, null=False, blank=False)
-    image = models.ImageField(default="application.jpg", null=False, blank=False)
+    image = models.ImageField(default="application.jpg")
     status = models.CharField(max_length=18, choices=STATUS, default="Waiting ...")
-    date_of_visit_by_technician = models.DateField(null=False, blank=False)
-    technician = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False)
+    date_of_visit_by_technician = models.DateField(null=True, blank=True)
+    technician = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True, editable=False)
     updated = models.DateTimeField(auto_now=True, editable=False)
 

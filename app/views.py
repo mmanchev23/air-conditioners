@@ -249,26 +249,69 @@ def profile_delete_submit(request, username):
 
 @login_required(redirect_field_name="sign_in/")
 def applications(request):
-    applications = Application.objects.all()
-    users = User.objects.all()
+    if request.user.role == "Customer":
+        applications = Application.objects.filter(customer=request.user)
+        users = User.objects.all()
 
-    applications_paginator = Paginator(applications, 5)
+        applications_paginator = Paginator(applications, 5)
 
-    page_number = request.GET.get("page")
+        page_number = request.GET.get("page")
 
-    try:
-        application_obj = applications_paginator.get_page(page_number)
-    except PageNotAnInteger:
-        application_obj = applications_paginator.page(1)
-    except EmptyPage:
-        application_obj = applications_paginator.page(applications_paginator.num_pages)
+        try:
+            application_obj = applications_paginator.get_page(page_number)
+        except PageNotAnInteger:
+            application_obj = applications_paginator.page(1)
+        except EmptyPage:
+            application_obj = applications_paginator.page(applications_paginator.num_pages)
 
-    context = {
-        "applications": application_obj,
-        "users": users,
-    }
+        context = {
+            "applications": application_obj,
+            "users": users,
+        }
 
-    return render(request, "app/applications.html", context)
+        return render(request, "app/applications.html", context)
+    elif request.user.role == "Tech":
+        applications = Application.objects.filter(technician=request.user)
+        users = User.objects.all()
+
+        applications_paginator = Paginator(applications, 5)
+
+        page_number = request.GET.get("page")
+
+        try:
+            application_obj = applications_paginator.get_page(page_number)
+        except PageNotAnInteger:
+            application_obj = applications_paginator.page(1)
+        except EmptyPage:
+            application_obj = applications_paginator.page(applications_paginator.num_pages)
+
+        context = {
+            "applications": application_obj,
+            "users": users,
+        }
+
+        return render(request, "app/applications.html", context)
+    else:
+        applications = Application.objects.all()
+        users = User.objects.all()
+
+        applications_paginator = Paginator(applications, 5)
+
+        page_number = request.GET.get("page")
+
+        try:
+            application_obj = applications_paginator.get_page(page_number)
+        except PageNotAnInteger:
+            application_obj = applications_paginator.page(1)
+        except EmptyPage:
+            application_obj = applications_paginator.page(applications_paginator.num_pages)
+
+        context = {
+            "applications": application_obj,
+            "users": users,
+        }
+
+        return render(request, "app/applications.html", context)
 
 @login_required(redirect_field_name="sign_in/")
 def application_create(request):
@@ -276,25 +319,17 @@ def application_create(request):
         title = request.POST.get("title")
         description = request.POST.get("description")
         address = request.POST.get("address")
-        status = request.POST.get("status")
-        date_of_visit_by_technician = request.POST.get("date_of_visit_by_technician")
-        technician_id = request.POST.get("technician")
-
-        technician = User.objects.get(pk=technician_id) or None
         
         if "img" in request.FILES:
             picture = request.FILES.get("img")
         else:
-            picture = "../static/images/application.png"
+            picture = "../static/images/application.jpg"
 
         application = Application.objects.create(
             customer=request.user,
             title=title,
             description=description,
             address=address,
-            status=status,
-            date_of_visit_by_technician=date_of_visit_by_technician,
-            technician=technician,
             image=picture
         )
 
@@ -307,27 +342,21 @@ def application_create(request):
 @login_required(redirect_field_name="sign_in/")
 def application_edit(request, id):
     if request.method == "POST":
-        application = application.objects.get(pk=id) or None
+        application = Application.objects.get(pk=id) or None
         
         title = request.POST.get("title")
         description = request.POST.get("description")
         address = request.POST.get("address")
-        status = request.POST.get("status")
-        date_of_visit_by_technician = request.POST.get("date_of_visit_by_technician")
-        technician = request.POST.get("technician")
         
         if "img" in request.FILES:
             picture = request.FILES.get("img")
         else:
-            picture = "../static/images/application.png"
+            picture = "../static/images/application.jpg"
 
-        application.title=title,
-        application.description=description,
-        application.address=address,
-        application.status=status,
-        application.date_of_visit_by_technician=date_of_visit_by_technician,
-        application.technician=technician,
-        application.picture=picture
+        application.title=title
+        application.description=description
+        application.address=address
+        application.image=picture
 
         application.save()
 
@@ -339,9 +368,60 @@ def application_edit(request, id):
 @login_required(redirect_field_name="sign_in/")
 def application_delete(request, id):
     if request.method == "POST":
-        application = application.objects.get(pk=id) or None
-        application.delete()
-        messages.success(request, f"Application deleted successfully!")
-        return HttpResponseRedirect(reverse("applications"))
+        application = Application.objects.get(pk=id) or None
+        if application.status == "Waiting ...":
+            application.delete()
+            messages.success(request, f"Application deleted successfully!")
+            return HttpResponseRedirect(reverse("applications"))
+        else:
+            messages.error(request, "Application status is waiting!")
+            return render(request, "app/applications.html", context)
+    else:
+        return render(request, "app/applications.html")
+
+@login_required(redirect_field_name="sign_in/")
+def applications_filter(request):
+    if request.method == "POST":
+        status = request.POST.get("status")
+
+        if request.user.role == "Customer":
+            applications = Application.objects.filter(status=status, customer=request.user) or None
+
+            context = {
+                "applications": applications,
+            }
+
+            if applications and applications.count() > 0:
+                messages.success(request, f"Found {applications.count()} results!")
+                return render(request, "app/applications.html", context)
+            else:
+                messages.error(request, "No results were found!")
+                return render(request, "app/applications.html", context)
+        elif request.user.role == "Tech":
+            applications = Application.objects.filter(status=status, technician=request.user) or None
+
+            context = {
+                "applications": applications,
+            }
+
+            if applications and applications.count() > 0:
+                messages.success(request, f"Found {applications.count()} results!")
+                return render(request, "app/applications.html", context)
+            else:
+                messages.error(request, "No results were found!")
+                return render(request, "app/applications.html", context)
+        else:
+            applications = Application.objects.filter(status=status) or None
+
+            context = {
+                "applications": applications,
+            }
+
+            if applications and applications.count() > 0:
+                messages.success(request, f"Found {applications.count()} results!")
+                return render(request, "app/applications.html", context)
+            else:
+                messages.error(request, "No results were found!")
+                return render(request, "app/applications.html", context)
     else:
         return render(request, "app/applications.html")

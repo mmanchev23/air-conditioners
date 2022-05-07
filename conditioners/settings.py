@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-tanaunps4lc8wjvutribalax3ebva(q@(layy2y0s!!s@5h_st
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1", "air-conditioners.herokuapp.com"]
 
 AUTH_USER_MODEL = "app.User"
 

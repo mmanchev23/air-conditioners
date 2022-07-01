@@ -1,8 +1,6 @@
 # Conditioners
 
-## Deployed on [Heroku](https://conditioners-django.herokuapp.com/)
-
-### How to start the project?
+## How to start the project?
 
 ### For Windows:
 ```
